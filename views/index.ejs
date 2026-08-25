@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BotPDI - Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white min-h-screen flex flex-col items-center justify-center">
+    <div class="text-center">
+        <h1 class="text-5xl font-bold mb-4">Bienvenido al Sistema de Misiones</h1>
+        <p class="mb-8 text-gray-400">Inicia sesión con Discord para acceder a tu panel.</p>
+        
+        <% if (!user) { %>
+            <a href="/auth/discord" class="bg-[#5865F2] hover:bg-[#4752C4] text-white font-bold py-3 px-6 rounded-lg text-lg transition duration-200">
+                Iniciar sesión con Discord
+            </a>
+        <% } else { %>
+            <div class="mb-6">
+                <p class="text-xl">Hola, <span class="font-bold text-blue-400"><%= user.username %></span>!</p>
+            </div>
+            <a href="/dashboard" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg text-lg transition duration-200 mr-2">
+                Ir al Dashboard
+            </a>
+            <a href="/auth/logout" class="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg text-lg transition duration-200">
+                Cerrar Sesión
+            </a>
+        <% } %>
+    </div>
+</body>
+</html>

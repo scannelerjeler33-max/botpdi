@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acceso Denegado</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white min-h-screen flex flex-col items-center justify-center">
+    <div class="text-center bg-gray-800 p-8 rounded-xl shadow-2xl max-w-md">
+        <svg class="w-20 h-20 text-red-500 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+        <h1 class="text-3xl font-bold mb-4 text-red-500">Acceso Denegado</h1>
+        <p class="mb-6 text-gray-400">Hola <strong><%= user.username %></strong>, no tienes los rangos necesarios en el servidor de Discord para acceder al sistema de misiones.</p>
+        <p class="mb-6 text-sm text-gray-500">Si crees que esto es un error, contacta a un administrador.</p>
+        
+        <a href="/auth/logout" class="bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-6 rounded-lg transition duration-200">
+            Cerrar Sesión
+        </a>
+    </div>
+</body>
+</html>

@@ -1,0 +1,36 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Mission {
+  id             Int      @id @default(autoincrement())
+  title          String
+  description    String
+  requiredProofs Int      @default(1)
+  createdAt      DateTime @default(now())
+  proofs         Proof[]
+}
+
+model Proof {
+  id        Int      @id @default(autoincrement())
+  missionId Int
+  userId    String
+  username  String
+  imageUrl  String
+  createdAt DateTime @default(now())
+  mission   Mission  @relation(fields: [missionId], references: [id])
+}
+
+model ActiveCase {
+  id        Int      @id @default(autoincrement())
+  userId    String
+  threadId  String
+  roleId    String
+  expiresAt DateTime
+  closed    Boolean  @default(false)
+}

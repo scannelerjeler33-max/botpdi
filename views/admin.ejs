@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Admin - BotPDI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        function showModal(id) { document.getElementById(id).classList.remove('hidden'); }
+        function hideModal(id) { document.getElementById(id).classList.add('hidden'); }
+    </script>
+</head>
+<body class="bg-gray-900 text-white min-h-screen">
+    <nav class="bg-gray-800 p-4 shadow-lg flex justify-between items-center">
+        <h1 class="text-2xl font-bold text-blue-400">Panel de Administración</h1>
+        <div>
+            <span class="mr-4 text-gray-300">Admin: <%= user.username %></span>
+            <a href="/dashboard/user" class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded text-sm font-semibold transition mr-2">Panel Usuario</a>
+            <a href="/auth/logout" class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded text-sm font-semibold transition">Salir</a>
+        </div>
+    </nav>
+
+    <div class="container mx-auto p-6 flex flex-col lg:flex-row gap-6">
+        
+        <!-- Columna de Misiones -->
+        <div class="w-full lg:w-1/3">
+            <div class="bg-gray-800 p-6 rounded-lg shadow-md mb-6">
+                <h2 class="text-xl font-bold mb-4 border-b border-gray-700 pb-2">Crear Nueva Misión</h2>
+                <form action="/dashboard/admin/missions" method="POST">
+                    <div class="mb-4">
+                        <label class="block text-gray-400 text-sm mb-2" for="title">Título</label>
+                        <input type="text" id="title" name="title" required class="w-full bg-gray-700 border border-gray-600 rounded p-2 text-white outline-none focus:border-blue-500">
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-400 text-sm mb-2" for="description">Descripción</label>
+                        <textarea id="description" name="description" required class="w-full bg-gray-700 border border-gray-600 rounded p-2 text-white outline-none focus:border-blue-500" rows="3"></textarea>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-400 text-sm mb-2" for="requiredProofs">Cantidad de Pruebas Requeridas</label>
+                        <input type="number" id="requiredProofs" name="requiredProofs" value="1" min="1" required class="w-full bg-gray-700 border border-gray-600 rounded p-2 text-white outline-none focus:border-blue-500">
+                    </div>
+                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition">Crear Misión</button>
+                </form>
+            </div>
+
+            <div class="bg-gray-800 p-6 rounded-lg shadow-md">
+                <h2 class="text-xl font-bold mb-4 border-b border-gray-700 pb-2">Misiones Activas</h2>
+                <% if (missions.length === 0) { %>
+                    <p class="text-gray-400 text-sm">No hay misiones creadas.</p>
+                <% } else { %>
+                    <ul class="space-y-4">
+                        <% missions.forEach(mission => { %>
+                            <li class="bg-gray-700 p-4 rounded-lg flex justify-between items-start">
+                                <div>
+                                    <h3 class="font-bold text-lg"><%= mission.title %></h3>
+                                    <p class="text-gray-400 text-sm mb-1"><%= mission.description %></p>
+                                    <span class="text-blue-300 text-xs font-semibold bg-blue-900/50 px-2 py-1 rounded">Pruebas requeridas: <%= mission.requiredProofs %></span>
+                                </div>
+                                <button type="button" onclick="showModal('delete-mission-<%= mission.id %>')" class="text-red-400 hover:text-red-300 text-sm font-bold bg-gray-800 px-2 py-1 rounded">X</button>
+                                
+                                <!-- Modal Eliminar Misión -->
+                                <div id="delete-mission-<%= mission.id %>" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
+                                    <div class="bg-gray-800 p-6 rounded-xl max-w-sm w-full shadow-2xl border border-gray-700">
+                                        <h3 class="text-xl font-bold mb-4 text-white">¿Eliminar Misión?</h3>
+                                        <p class="text-gray-400 mb-6 text-sm">Estás a punto de eliminar la misión <strong><%= mission.title %></strong>. Esta acción borrará la misión y todas las pruebas subidas por los usuarios. No se puede deshacer.</p>
+                                        <form action="/dashboard/admin/missions/delete/<%= mission.id %>" method="POST" class="flex justify-end space-x-3">
+                                            <button type="button" onclick="hideModal('delete-mission-<%= mission.id %>')" class="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg font-semibold transition text-sm">Cancelar</button>
+                                            <button type="submit" class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg font-semibold transition shadow-lg text-sm">Sí, Eliminar</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </li>
+                        <% }) %>
+                    </ul>
+                <% } %>
+            </div>
+            <div class="bg-gray-800 p-6 rounded-lg shadow-md mt-6">
+                <h2 class="text-xl font-bold mb-4 border-b border-gray-700 pb-2">Casos Activos</h2>
+                <% if (activeCases && activeCases.length === 0) { %>
+                    <p class="text-gray-400 text-sm">No hay casos activos.</p>
+                <% } else if (activeCases) { %>
+                    <ul class="space-y-4">
+                        <% activeCases.forEach(caso => { %>
+                            <li class="bg-gray-700 p-4 rounded-lg flex flex-col xl:flex-row justify-between items-start xl:items-center">
+                                <div class="mb-3 xl:mb-0">
+                                    <h3 class="font-bold text-md text-purple-400 break-all"><%= caso.title %></h3>
+                                    <p class="text-gray-400 text-xs">Abierto por: <%= caso.username %></p>
+                                    <p class="text-gray-400 text-xs">Expira: <%= new Date(caso.expiresAt).toLocaleDateString() %></p>
+                                </div>
+                                <button type="button" onclick="showModal('close-case-<%= caso.id %>')" class="bg-red-600 hover:bg-red-700 text-white font-bold py-1 px-3 rounded transition text-sm whitespace-nowrap">Cerrar Caso</button>
+                                
+                                <!-- Modal Cerrar Caso -->
+                                <div id="close-case-<%= caso.id %>" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
+                                    <div class="bg-gray-800 p-6 rounded-xl max-w-sm w-full shadow-2xl border border-gray-700">
+                                        <h3 class="text-xl font-bold mb-4 text-white">¿Cerrar este caso?</h3>
+                                        <p class="text-gray-400 mb-6 text-sm">Estás a punto de cerrar <strong><%= caso.title %></strong>. Esto le quitará el rol al usuario y pondrá la etiqueta [CERRADO] en el título del hilo de Discord.</p>
+                                        <form action="/dashboard/admin/casos/close/<%= caso.id %>" method="POST" class="flex justify-end space-x-3">
+                                            <button type="button" onclick="hideModal('close-case-<%= caso.id %>')" class="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg font-semibold transition text-sm">Cancelar</button>
+                                            <button type="submit" class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg font-semibold transition shadow-lg text-sm">Sí, Cerrar Caso</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </li>
+                        <% }) %>
+                    </ul>
+                <% } %>
+            </div>
+        </div>
+
+        <!-- Columna de Pruebas Subidas (Log) -->
+        <div class="w-full lg:w-2/3">
+            <div class="bg-gray-800 p-6 rounded-lg shadow-md">
+                <h2 class="text-xl font-bold mb-4 border-b border-gray-700 pb-2">Log de Pruebas Subidas (Auto-aceptadas)</h2>
+                <% if (proofs.length === 0) { %>
+                    <p class="text-gray-400">No hay pruebas subidas aún.</p>
+                <% } else { %>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <% proofs.forEach(proof => { %>
+                            <div class="bg-gray-700 rounded-lg overflow-hidden border border-gray-600">
+                                <a href="<%= proof.imageUrl %>" target="_blank">
+                                    <img src="<%= proof.imageUrl %>" alt="Prueba de <%= proof.username %>" class="w-full h-48 object-cover hover:opacity-80 transition cursor-pointer">
+                                </a>
+                                <div class="p-4">
+                                    <div class="flex justify-between items-center mb-2">
+                                        <span class="bg-green-600 text-xs font-bold px-2 py-1 rounded uppercase tracking-wide">Aceptada</span>
+                                        <span class="text-xs text-gray-400"><%= new Date(proof.createdAt).toLocaleString() %></span>
+                                    </div>
+                                    <p class="text-sm font-semibold mb-1 text-blue-300"><%= proof.mission.title %></p>
+                                    <p class="text-sm text-gray-300">Completada por: <span class="font-bold text-white"><%= proof.username %></span></p>
+                                </div>
+                            </div>
+                        <% }) %>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+
+    </div>
+</body>
+</html>

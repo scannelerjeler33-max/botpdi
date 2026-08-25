@@ -1,0 +1,28 @@
+{
+  "name": "botpdi",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "build": "prisma generate",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@prisma/client": "^5.22.0",
+    "@supabase/supabase-js": "^2.39.3",
+    "discord.js": "^14.27.0",
+    "dotenv": "^17.4.2",
+    "ejs": "^6.0.1",
+    "express": "^5.2.1",
+    "express-session": "^1.19.0",
+    "multer": "^2.2.0",
+    "passport": "^0.7.0",
+    "passport-discord": "^0.1.4",
+    "prisma": "^5.22.0",
+    "ws": "^8.21.3"
+  }
+}

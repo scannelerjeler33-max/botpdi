@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Usuario - BotPDI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        function showUploadForm(missionId) {
+            document.getElementById('upload-modal-' + missionId).classList.remove('hidden');
+        }
+        function hideUploadForm(missionId) {
+            document.getElementById('upload-modal-' + missionId).classList.add('hidden');
+        }
+        function showCasoForm() {
+            document.getElementById('caso-modal').classList.remove('hidden');
+        }
+        function hideCasoForm() {
+            document.getElementById('caso-modal').classList.add('hidden');
+        }
+    </script>
+</head>
+<body class="bg-gray-900 text-white min-h-screen">
+    <nav class="bg-gray-800 p-4 shadow-lg flex justify-between items-center">
+        <h1 class="text-2xl font-bold text-green-400">Dashboard de Misiones</h1>
+        <div>
+            <span class="mr-4 text-gray-300">Usuario: <%= user.username %></span>
+            <% if (typeof isAdmin !== 'undefined' && isAdmin) { %>
+                <a href="/dashboard/admin" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded text-sm font-semibold transition mr-2">Panel Admin</a>
+            <% } %>
+            <a href="/auth/logout" class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded text-sm font-semibold transition">Salir</a>
+        </div>
+    </nav>
+
+    <div class="container mx-auto p-6 max-w-4xl">
+        
+        <!-- Sección de Abrir Caso -->
+        <div class="mb-10 flex flex-col md:flex-row justify-between items-center bg-gray-800 p-6 rounded-xl shadow-lg border border-gray-700">
+            <div class="mb-4 md:mb-0 text-center md:text-left">
+                <h2 class="text-2xl font-bold text-white">Gestión de Casos</h2>
+                <p class="text-gray-400 text-sm">Abre un nuevo caso de investigación directamente en Discord.</p>
+            </div>
+            <button onclick="showCasoForm()" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-8 rounded-lg shadow-lg transition whitespace-nowrap">
+                + Abrir Caso
+            </button>
+        </div>
+
+        <!-- Modal Abrir Caso -->
+        <div id="caso-modal" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
+            <div class="bg-gray-800 p-6 rounded-xl max-w-md w-full shadow-2xl border border-gray-700">
+                <h3 class="text-2xl font-bold mb-4">Abrir Nuevo Caso</h3>
+                <form action="/dashboard/user/caso" method="POST">
+                    <div class="mb-4">
+                        <label class="block text-gray-400 text-sm mb-2">Número de Caso</label>
+                        <input type="text" name="numeroCaso" placeholder="Ej: 021" required class="w-full bg-gray-700 border border-gray-600 rounded p-2 text-white outline-none focus:border-purple-500">
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-400 text-sm mb-2">Nombre de Mafia / Organización</label>
+                        <input type="text" name="nombreMafia" placeholder="Ej: PEÑAROL" required class="w-full bg-gray-700 border border-gray-600 rounded p-2 text-white outline-none focus:border-purple-500">
+                    </div>
+                    <div class="mb-6">
+                        <label class="block text-gray-400 text-sm mb-2">Descripción del caso</label>
+                        <textarea name="descripcionCaso" rows="4" required class="w-full bg-gray-700 border border-gray-600 rounded p-2 text-white outline-none focus:border-purple-500"></textarea>
+                    </div>
+                    <div class="flex justify-end space-x-3">
+                        <button type="button" onclick="hideCasoForm()" class="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg font-semibold transition">Cancelar</button>
+                        <button type="submit" class="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded-lg font-semibold transition shadow-lg">Crear Publicación</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <h2 class="text-3xl font-bold mb-8 text-center border-t border-gray-700 pt-8 mt-4">Misiones Disponibles</h2>
+        
+        <% if (missions.length === 0) { %>
+            <div class="text-center p-12 bg-gray-800 rounded-xl">
+                <p class="text-gray-400 text-xl">No hay misiones activas en este momento. ¡Vuelve más tarde!</p>
+            </div>
+        <% } else { %>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <% missions.forEach(mission => { %>
+                    <div class="bg-gray-800 p-6 rounded-xl shadow-lg border-t-4 <%= completedMissions[mission.id] ? 'border-green-500' : 'border-blue-500' %>">
+                        <div class="flex justify-between items-start mb-4">
+                            <h3 class="text-xl font-bold"><%= mission.title %></h3>
+                            <% if (completedMissions[mission.id]) { %>
+                                <span class="bg-green-600/20 text-green-400 text-xs font-bold px-3 py-1 rounded-full flex items-center">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                    Completada
+                                </span>
+                            <% } %>
+                        </div>
+                        <p class="text-gray-400 mb-4 min-h-[40px]"><%= mission.description %></p>
+                        
+                        <% const count = proofCounts[mission.id] || 0; %>
+                        <div class="mb-6">
+                            <div class="flex justify-between text-sm mb-1">
+                                <span class="font-semibold text-gray-300">Progreso</span>
+                                <span class="<%= count >= mission.requiredProofs ? 'text-green-400' : 'text-blue-400' %> font-bold"><%= count %> / <%= mission.requiredProofs %></span>
+                            </div>
+                            <div class="w-full bg-gray-700 rounded-full h-2.5">
+                                <div class="bg-blue-500 h-2.5 rounded-full" style="width: <%= Math.min((count / mission.requiredProofs) * 100, 100) %>%"></div>
+                            </div>
+                        </div>
+                        
+                        <% if (!completedMissions[mission.id]) { %>
+                            <button onclick="showUploadForm(<%= mission.id %>)" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition shadow-md">
+                                Subir Prueba
+                            </button>
+                        <% } else { %>
+                            <button disabled class="w-full bg-gray-700 text-gray-400 font-bold py-2 px-4 rounded-lg cursor-not-allowed">
+                                Ya completaste esta misión
+                            </button>
+                        <% } %>
+                    </div>
+
+                    <!-- Modal de Subida -->
+                    <div id="upload-modal-<%= mission.id %>" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
+                        <div class="bg-gray-800 p-6 rounded-xl max-w-md w-full shadow-2xl border border-gray-700">
+                            <h3 class="text-2xl font-bold mb-4">Subir Prueba</h3>
+                            <p class="text-gray-400 mb-6 text-sm">Misión: <span class="font-bold text-white"><%= mission.title %></span></p>
+                            
+                            <form action="/dashboard/user/upload" method="POST" enctype="multipart/form-data">
+                                <input type="hidden" name="missionId" value="<%= mission.id %>">
+                                
+                                <div class="mb-6">
+                                    <label class="block text-gray-300 font-semibold mb-2">Selecciona tu foto</label>
+                                    <input type="file" name="proofImage" accept="image/*" required class="w-full text-sm text-gray-400
+                                        file:mr-4 file:py-2 file:px-4
+                                        file:rounded-md file:border-0
+                                        file:text-sm file:font-semibold
+                                        file:bg-blue-600 file:text-white
+                                        hover:file:bg-blue-700 cursor-pointer">
+                                </div>
+                                
+                                <div class="flex justify-end space-x-3">
+                                    <button type="button" onclick="hideUploadForm(<%= mission.id %>)" class="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg font-semibold transition">Cancelar</button>
+                                    <button type="submit" class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg font-semibold transition shadow-lg">Enviar Prueba</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                <% }) %>
+            </div>
+        <% } %>
+    </div>
+</body>
+</html>
