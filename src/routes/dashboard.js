@@ -139,7 +139,7 @@ router.post('/admin/missions', async (req, res) => {
                 .setTimestamp();
 
             await discordChannel.send({ 
-                content: '<@&1533571809675448331>', 
+                content: '<@&1519516475688357958>', 
                 embeds: [embed] 
             }).catch(console.error);
         }
