@@ -138,7 +138,10 @@ router.post('/admin/missions', async (req, res) => {
                 .addFields({ name: 'Acción', value: `👉 [Entra aquí para subir tus pruebas](${dashboardUrl})` })
                 .setTimestamp();
 
-            await discordChannel.send({ embeds: [embed] }).catch(console.error);
+            await discordChannel.send({ 
+                content: '<@&1533571809675448331>', 
+                embeds: [embed] 
+            }).catch(console.error);
         }
     } catch (err) {
         console.error("Error al crear la misión:", err);
@@ -200,11 +203,11 @@ router.post('/admin/casos/close/:id', async (req, res) => {
 router.get('/user', async (req, res) => {
     const isAdmin = req.userRoles.some(role => adminRoles.includes(role));
     const isUser = req.userRoles.some(role => userRoles.includes(role));
-    if (!isUser && !isAdmin) return res.status(403).send("No tienes permisos de usuario para ver misiones.");
+    if (!isUser && !isAdmin) return res.render('no_access', { user: req.user });
 
     const missions = await prisma.mission.findMany({ orderBy: { createdAt: 'desc' } });
     
-    // Obtener pruebas enviadas por este usuario
+    // Obtener pruebas enviadas por este usuario para la vista
     const userProofs = await prisma.proof.findMany({
         where: { userId: req.user.id }
     });
@@ -224,7 +227,40 @@ router.get('/user', async (req, res) => {
         }
     });
 
-    res.render('user', { user: req.user, missions, completedMissions, proofCounts, isAdmin });
+    // --- CÁLCULO DEL RANKING (TOP AGENTES) ---
+    const allProofs = await prisma.proof.findMany();
+    const userStats = {};
+    allProofs.forEach(p => {
+        if (!userStats[p.userId]) {
+            userStats[p.userId] = { username: p.username, missionCounts: {} };
+        }
+        if (!userStats[p.userId].missionCounts[p.missionId]) {
+            userStats[p.userId].missionCounts[p.missionId] = 0;
+        }
+        userStats[p.userId].missionCounts[p.missionId]++;
+    });
+
+    const leaderboard = [];
+    for (const userId in userStats) {
+        const stats = userStats[userId];
+        let completedCount = 0;
+        for (const missionId in stats.missionCounts) {
+            const count = stats.missionCounts[missionId];
+            const mission = missions.find(m => m.id === parseInt(missionId));
+            if (mission && count >= mission.requiredProofs) {
+                completedCount++;
+            }
+        }
+        if (completedCount > 0) {
+            leaderboard.push({ username: stats.username, completedCount });
+        }
+    }
+    
+    leaderboard.sort((a, b) => b.completedCount - a.completedCount);
+    const topLeaderboard = leaderboard.slice(0, 5);
+    // ------------------------------------------
+
+    res.render('user', { user: req.user, missions, completedMissions, proofCounts, isAdmin, topLeaderboard });
 });
 
 router.post('/user/upload', upload.single('proofImage'), async (req, res) => {
