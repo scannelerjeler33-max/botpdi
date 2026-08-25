@@ -109,13 +109,41 @@ router.post('/admin/missions', async (req, res) => {
     if (!isAdmin) return res.status(403).send("No autorizado.");
 
     const { title, description, requiredProofs } = req.body;
-    await prisma.mission.create({
-        data: { 
-            title, 
-            description,
-            requiredProofs: requiredProofs ? parseInt(requiredProofs) : 1
+    
+    try {
+        const mission = await prisma.mission.create({
+            data: {
+                title,
+                description,
+                requiredProofs: parseInt(requiredProofs) || 1
+            }
+        });
+
+        // Enviar notificación a Discord (Canal 1532199059094376648)
+        const channelId = '1532199059094376648';
+        const discordChannel = await req.discordClient.channels.fetch(channelId).catch(() => null);
+        
+        if (discordChannel) {
+            const { EmbedBuilder } = require('discord.js');
+            // Sacar la URL base usando la variable configurada
+            const baseUrl = process.env.DISCORD_CALLBACK_URL 
+                ? new URL(process.env.DISCORD_CALLBACK_URL).origin 
+                : `http://${req.get('host')}`;
+            const dashboardUrl = `${baseUrl}/dashboard/user`;
+            
+            const embed = new EmbedBuilder()
+                .setTitle('🚨 ¡Nueva Misión Disponible!')
+                .setDescription(`**${mission.title}**\n\n${mission.description}\n\n**Pruebas Requeridas:** ${mission.requiredProofs}`)
+                .setColor(0x9b59b6) // Color morado
+                .addFields({ name: 'Acción', value: `👉 [Entra aquí para subir tus pruebas](${dashboardUrl})` })
+                .setTimestamp();
+
+            await discordChannel.send({ embeds: [embed] }).catch(console.error);
         }
-    });
+    } catch (err) {
+        console.error("Error al crear la misión:", err);
+    }
+    
     res.redirect('/dashboard/admin');
 });
 
