@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Postulación Interviewer - BotPDI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white min-h-screen pb-12">
+    <nav class="bg-gray-800 p-4 shadow-lg flex justify-between items-center mb-8">
+        <h1 class="text-xl font-bold text-blue-400">PDI - Panel de Entrevistadores</h1>
+        <a href="/dashboard/user" class="text-gray-300 hover:text-white font-semibold transition">← Volver al Panel</a>
+    </nav>
+
+    <div class="container mx-auto px-4 max-w-3xl">
+        <div class="bg-gray-800 rounded-xl shadow-xl p-8 border border-gray-700">
+            <h2 class="text-3xl font-bold mb-2 text-center text-blue-400">Formulario de Postulación</h2>
+            <p class="text-gray-400 text-center mb-8">Interviewer PFA (Requiere rango Sargento Mayor)</p>
+
+            <form action="/dashboard/user/postulacion" method="POST" class="space-y-8">
+                <!-- Datos Personales -->
+                <div class="space-y-4">
+                    <h3 class="text-xl font-bold text-white border-b border-gray-600 pb-2">Datos Personales</h3>
+                    
+                    <div>
+                        <label class="block text-gray-400 text-sm mb-2">Nombre IC + Placa</label>
+                        <input type="text" name="nombrePlaca" required class="w-full bg-gray-700 border border-gray-600 rounded-lg p-3 text-white focus:outline-none focus:border-blue-500">
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-gray-400 text-sm mb-2">Rango actual en PFA</label>
+                            <input type="text" name="rango" required class="w-full bg-gray-700 border border-gray-600 rounded-lg p-3 text-white focus:outline-none focus:border-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-gray-400 text-sm mb-2">Antigüedad en la PFA</label>
+                            <input type="text" name="antiguedad" required class="w-full bg-gray-700 border border-gray-600 rounded-lg p-3 text-white focus:outline-none focus:border-blue-500">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-gray-400 text-sm mb-2">Edad OOC</label>
+                            <input type="text" name="edadOoc" required class="w-full bg-gray-700 border border-gray-600 rounded-lg p-3 text-white focus:outline-none focus:border-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-gray-400 text-sm mb-2">Disponibilidad horaria semanal</label>
+                            <input type="text" name="disponibilidad" required class="w-full bg-gray-700 border border-gray-600 rounded-lg p-3 text-white focus:outline-none focus:border-blue-500">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cuestionario Breve -->
+                <div class="space-y-6">
+                    <h3 class="text-xl font-bold text-white border-b border-gray-600 pb-2">Cuestionario Breve</h3>
+
+                    <div>
+                        <label class="block text-gray-300 font-semibold mb-2">1) ¿Qué priorizás al tomar una oposición a un civil: conocimiento, actitud o criterio? Justificá.</label>
+                        <textarea name="q1" rows="3" required class="w-full bg-gray-700 border border-gray-600 rounded-lg p-3 text-white focus:outline-none focus:border-blue-500"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-gray-300 font-semibold mb-2">2) ¿Qué cosas podés hacer y qué cosas NO podés hacer siendo Interviewer? ¿Por qué?</label>
+                        <textarea name="q2" rows="3" required class="w-full bg-gray-700 border border-gray-600 rounded-lg p-3 text-white focus:outline-none focus:border-blue-500"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-gray-300 font-semibold mb-2">3) ¿Qué considerás una falta leve y qué una falta grave dentro de la PFA?</label>
+                        <textarea name="q3" rows="3" required class="w-full bg-gray-700 border border-gray-600 rounded-lg p-3 text-white focus:outline-none focus:border-blue-500"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-gray-300 font-semibold mb-2">4) ¿Cómo debería ser el comportamiento de un Interviewer y por qué?</label>
+                        <textarea name="q4" rows="3" required class="w-full bg-gray-700 border border-gray-600 rounded-lg p-3 text-white focus:outline-none focus:border-blue-500"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-gray-300 font-semibold mb-2">5) Un oficial comete un error sin mala intención y es su primera vez. ¿Como actuas?</label>
+                        <textarea name="q5" rows="3" required class="w-full bg-gray-700 border border-gray-600 rounded-lg p-3 text-white focus:outline-none focus:border-blue-500"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-gray-300 font-semibold mb-2">6) ¿Qué es más peligroso para la PFA: no sancionar nunca o sancionar mal? ¿Por qué?</label>
+                        <textarea name="q6" rows="3" required class="w-full bg-gray-700 border border-gray-600 rounded-lg p-3 text-white focus:outline-none focus:border-blue-500"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-gray-300 font-semibold mb-2">7) ¿Por qué considerás que tenés el criterio necesario para ser Interviewer PFA?</label>
+                        <textarea name="q7" rows="3" required class="w-full bg-gray-700 border border-gray-600 rounded-lg p-3 text-white focus:outline-none focus:border-blue-500"></textarea>
+                    </div>
+                </div>
+
+                <div class="flex justify-end pt-4">
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg shadow-lg transition text-lg w-full md:w-auto">
+                        Enviar Postulación
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

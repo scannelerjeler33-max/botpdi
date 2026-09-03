@@ -34,15 +34,22 @@
 
     <div class="container mx-auto p-6 max-w-4xl">
         
-        <!-- Sección de Abrir Caso -->
+        <!-- Sección de Abrir Caso e Interviewer -->
         <div class="mb-10 flex flex-col md:flex-row justify-between items-center bg-gray-800 p-6 rounded-xl shadow-lg border border-gray-700">
             <div class="mb-4 md:mb-0 text-center md:text-left">
-                <h2 class="text-2xl font-bold text-white">Gestión de Casos</h2>
-                <p class="text-gray-400 text-sm">Abre un nuevo caso de investigación directamente en Discord.</p>
+                <h2 class="text-2xl font-bold text-white">Gestión de Casos e Interviewer</h2>
+                <p class="text-gray-400 text-sm">Abre un nuevo caso de investigación o envia tu postulación a Interviewer PFA.</p>
             </div>
-            <button onclick="showCasoForm()" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-8 rounded-lg shadow-lg transition whitespace-nowrap">
-                + Abrir Caso
-            </button>
+            <div class="flex flex-col md:flex-row space-y-3 md:space-y-0 md:space-x-4">
+                <button onclick="showCasoForm()" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-8 rounded-lg shadow-lg transition whitespace-nowrap">
+                    + Abrir Caso
+                </button>
+                <% if (typeof canPostular !== 'undefined' && canPostular) { %>
+                    <a href="/dashboard/user/postulacion" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg shadow-lg transition whitespace-nowrap text-center">
+                        📝 Postularse a Interviewer
+                    </a>
+                <% } %>
+            </div>
         </div>
 
         <!-- Modal Abrir Caso -->

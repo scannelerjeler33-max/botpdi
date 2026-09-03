@@ -1,6 +1,6 @@
 require('dotenv').config();
 global.WebSocket = require('ws');
-const { Client, GatewayIntentBits } = require('discord.js');
+const { Client, GatewayIntentBits, ActionRowBuilder, ModalBuilder, TextInputBuilder, TextInputStyle } = require('discord.js');
 const express = require('express');
 const session = require('express-session');
 const passport = require('passport');
@@ -17,6 +17,66 @@ const prisma = new PrismaClient();
 const client = new Client({
     intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers]
 });
+
+// --- LÓGICA DE INTERACCIONES DE BOTONES Y MODALES ---
+client.on('interactionCreate', async (interaction) => {
+    try {
+        if (interaction.isButton()) {
+            if (interaction.customId.startsWith('accept_int_')) {
+                const userId = interaction.customId.split('_')[2];
+                const member = await interaction.guild.members.fetch(userId).catch(() => null);
+                
+                if (member) {
+                    const roles = ['1403933697576538173', '1437860236126982145', '1432090508540248268'];
+                    await member.roles.add(roles).catch(console.error);
+                    await member.send("Felicitaciones fuiste aceptado de interviewer, lee las normativas y comenza a tomar oposiciones y trabajar.").catch(() => null);
+                }
+                
+                await interaction.update({ 
+                    content: `✅ **Postulación aceptada** por <@${interaction.user.id}>`, 
+                    components: [] 
+                });
+            }
+            
+            if (interaction.customId.startsWith('reject_int_')) {
+                const userId = interaction.customId.split('_')[2];
+                
+                const modal = new ModalBuilder()
+                    .setCustomId(`reject_modal_${userId}`)
+                    .setTitle('Motivo de Rechazo');
+                    
+                const reasonInput = new TextInputBuilder()
+                    .setCustomId('reason')
+                    .setLabel("Motivo (se enviará al usuario)")
+                    .setStyle(TextInputStyle.Paragraph)
+                    .setRequired(true);
+                    
+                modal.addComponents(new ActionRowBuilder().addComponents(reasonInput));
+                await interaction.showModal(modal);
+            }
+        }
+        
+        if (interaction.isModalSubmit()) {
+            if (interaction.customId.startsWith('reject_modal_')) {
+                const userId = interaction.customId.split('_')[2];
+                const reason = interaction.fields.getTextInputValue('reason');
+                
+                const member = await interaction.guild.members.fetch(userId).catch(() => null);
+                if (member) {
+                    await member.send(`Tu postulación para Interviewer ha sido rechazada.\n**Motivo:** ${reason}`).catch(() => null);
+                }
+                
+                await interaction.update({ 
+                    content: `❌ **Postulación rechazada** por <@${interaction.user.id}>\n**Motivo:** ${reason}`, 
+                    components: [] 
+                });
+            }
+        }
+    } catch (e) {
+        console.error("Error en interactionCreate:", e);
+    }
+});
+// ---------------------------------------------------
 
 client.once('ready', () => {
     console.log(`Bot conectado como ${client.user.tag}`);

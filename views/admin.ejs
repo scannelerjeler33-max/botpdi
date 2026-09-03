@@ -20,9 +20,25 @@
         </div>
     </nav>
 
-    <div class="container mx-auto p-6 flex flex-col lg:flex-row gap-6">
-        
-        <!-- Columna de Misiones -->
+    <div class="container mx-auto p-6 flex flex-col gap-6">
+
+        <!-- Sección de Anuncios -->
+        <div class="bg-gray-800 p-6 rounded-lg shadow-md border border-gray-700">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-4 md:mb-0">
+                    <h2 class="text-2xl font-bold text-white flex items-center"><span class="mr-2">📢</span> Anuncios Oficiales</h2>
+                    <p class="text-gray-400 mt-1 text-sm">Lanza anuncios automáticos preconfigurados en el servidor de Discord.</p>
+                </div>
+                <form action="/dashboard/admin/aviso-interviewer" method="POST">
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg transition whitespace-nowrap">
+                        Tirar Aviso Interviewer
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div class="flex flex-col lg:flex-row gap-6">
+            <!-- Columna de Misiones -->
         <div class="w-full lg:w-1/3">
             <div class="bg-gray-800 p-6 rounded-lg shadow-md mb-6">
                 <h2 class="text-xl font-bold mb-4 border-b border-gray-700 pb-2">Crear Nueva Misión</h2>

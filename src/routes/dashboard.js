@@ -199,6 +199,114 @@ router.post('/admin/casos/close/:id', async (req, res) => {
     res.redirect('/dashboard/admin');
 });
 
+router.post('/admin/aviso-interviewer', async (req, res) => {
+    const isAdmin = req.userRoles.some(role => adminRoles.includes(role));
+    if (!isAdmin) return res.status(403).send("No autorizado.");
+
+    const channelId = '1364055075684618434';
+    const discordChannel = await req.discordClient.channels.fetch(channelId).catch(() => null);
+
+    if (discordChannel) {
+        const text = `# 📢 POSTULACIONES ABIERTAS — INTERVIEWER | PFA
+
+Se encuentran abiertas las postulaciones para Interviewer.
+
+📌 Requisito: rango mínimo Sargento Mayor.
+
+**🏆 TOP 1: La persona que más gente ingrese a la PFA se llevará 1 Promote + 3 Coins.**
+
+📋 ¿Qué buscamos?
+
+• Ser constante, preciso y paciente durante los exámenes.
+• Evitar trampas sin facilitar el examen al punto de bypassearlo.
+• Atender tickets de dudas y reportes con respeto y buena actitud.
+• Ser constante en las oposiciones y dar el ejemplo a los nuevos.
+• Asegurar que los pfa sigan las normativas y en caso de que no, sacar evidencia y sancionarlos
+
+⭐ Beneficios: Ser Interviewer te da la posibilidad de ser **Ayudante Head** y, con buen desempeño IC/OOC y constancia, **ser considerado para un futuro puesto de Head.**
+
+<@&1393678701408817284>`;
+        
+        await discordChannel.send({ content: text }).catch(console.error);
+    }
+    
+    res.redirect('/dashboard/admin');
+});
+
+// --- POSTULACIONES INTERVIEWER ---
+const POSTULACION_ROLE = '1393678701408817284';
+
+router.get('/user/postulacion', async (req, res) => {
+    const hasRole = req.userRoles.includes(POSTULACION_ROLE);
+    const isAdmin = req.userRoles.some(role => adminRoles.includes(role));
+    
+    if (!hasRole && !isAdmin) {
+        return res.render('no_access', { user: req.user, message: "No tienes el rango mínimo requerido (Sargento Mayor) para postularte a Interviewer." });
+    }
+    
+    res.render('postulacion', { user: req.user });
+});
+
+router.post('/user/postulacion', async (req, res) => {
+    const hasRole = req.userRoles.includes(POSTULACION_ROLE);
+    const isAdmin = req.userRoles.some(role => adminRoles.includes(role));
+    
+    if (!hasRole && !isAdmin) return res.status(403).send("No autorizado.");
+
+    const { 
+        nombrePlaca, rango, antiguedad, edadOoc, disponibilidad,
+        q1, q2, q3, q4, q5, q6, q7 
+    } = req.body;
+
+    try {
+        const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+        
+        const embed1 = new EmbedBuilder()
+            .setTitle(`📝 Postulación Interviewer - ${nombrePlaca}`)
+            .setColor(0x3498db)
+            .addFields(
+                { name: '👤 Datos Personales', value: `**Rango:** ${rango}\n**Antigüedad:** ${antiguedad}\n**Edad OOC:** ${edadOoc}\n**Disponibilidad:** ${disponibilidad}` },
+                { name: '1) Prioridad en oposición', value: String(q1).substring(0, 1024) },
+                { name: '2) Qué hacer y NO hacer', value: String(q2).substring(0, 1024) },
+                { name: '3) Falta leve y grave', value: String(q3).substring(0, 1024) },
+                { name: '4) Comportamiento', value: String(q4).substring(0, 1024) }
+            );
+
+        const embed2 = new EmbedBuilder()
+            .setColor(0x3498db)
+            .addFields(
+                { name: '5) Error sin mala intención', value: String(q5).substring(0, 1024) },
+                { name: '6) Peligro: no sancionar vs sancionar mal', value: String(q6).substring(0, 1024) },
+                { name: '7) Criterio personal', value: String(q7).substring(0, 1024) }
+            )
+            .setFooter({ text: `Discord ID: ${req.user.id} | User: ${req.user.username}` })
+            .setTimestamp();
+
+        const row = new ActionRowBuilder().addComponents(
+            new ButtonBuilder()
+                .setCustomId(`accept_int_${req.user.id}`)
+                .setLabel('✅ Aceptar')
+                .setStyle(ButtonStyle.Success),
+            new ButtonBuilder()
+                .setCustomId(`reject_int_${req.user.id}`)
+                .setLabel('❌ Rechazar')
+                .setStyle(ButtonStyle.Danger)
+        );
+
+        // Nuevo canal proporcionado por el usuario
+        const channelId = '1526485176698540072'; 
+        const discordChannel = await req.discordClient.channels.fetch(channelId).catch(() => null);
+        
+        if (discordChannel) {
+            await discordChannel.send({ embeds: [embed1, embed2], components: [row] }).catch(console.error);
+        }
+    } catch (err) {
+        console.error("Error al procesar la postulación:", err);
+    }
+
+    res.redirect('/dashboard/user');
+});
+
 // Panel Usuario
 router.get('/user', async (req, res) => {
     const isAdmin = req.userRoles.some(role => adminRoles.includes(role));
@@ -260,7 +368,9 @@ router.get('/user', async (req, res) => {
     const topLeaderboard = leaderboard.slice(0, 5);
     // ------------------------------------------
 
-    res.render('user', { user: req.user, missions, completedMissions, proofCounts, isAdmin, topLeaderboard });
+    const canPostular = req.userRoles.includes(POSTULACION_ROLE) || isAdmin;
+
+    res.render('user', { user: req.user, missions, completedMissions, proofCounts, isAdmin, topLeaderboard, canPostular });
 });
 
 router.post('/user/upload', upload.single('proofImage'), async (req, res) => {
