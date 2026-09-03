@@ -34,89 +34,93 @@
 
     <div class="container mx-auto p-6 max-w-4xl">
         
-        <!-- Sección de Abrir Caso e Interviewer -->
-        <div class="mb-10 flex flex-col md:flex-row justify-between items-center bg-gray-800 p-6 rounded-xl shadow-lg border border-gray-700">
-            <div class="mb-4 md:mb-0 text-center md:text-left">
-                <h2 class="text-2xl font-bold text-white">Gestión de Casos e Interviewer</h2>
-                <p class="text-gray-400 text-sm">Abre un nuevo caso de investigación o envia tu postulación a Interviewer PFA.</p>
-            </div>
-            <div class="flex flex-col md:flex-row space-y-3 md:space-y-0 md:space-x-4">
-                <button onclick="showCasoForm()" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-8 rounded-lg shadow-lg transition whitespace-nowrap">
-                    + Abrir Caso
-                </button>
-                <% if (typeof canPostular !== 'undefined' && canPostular) { %>
-                    <a href="/dashboard/user/postulacion" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg shadow-lg transition whitespace-nowrap text-center">
-                        📝 Postularse a Interviewer
-                    </a>
-                <% } %>
-            </div>
-        </div>
-
-        <!-- Modal Abrir Caso -->
-        <div id="caso-modal" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
-            <div class="bg-gray-800 p-6 rounded-xl max-w-md w-full shadow-2xl border border-gray-700">
-                <h3 class="text-2xl font-bold mb-4">Abrir Nuevo Caso</h3>
-                <form action="/dashboard/user/caso" method="POST">
-                    <div class="mb-4">
-                        <label class="block text-gray-400 text-sm mb-2">Número de Caso</label>
-                        <input type="text" name="numeroCaso" placeholder="Ej: 021" required class="w-full bg-gray-700 border border-gray-600 rounded p-2 text-white outline-none focus:border-purple-500">
-                    </div>
-                    <div class="mb-4">
-                        <label class="block text-gray-400 text-sm mb-2">Nombre de Mafia / Organización</label>
-                        <input type="text" name="nombreMafia" placeholder="Ej: PEÑAROL" required class="w-full bg-gray-700 border border-gray-600 rounded p-2 text-white outline-none focus:border-purple-500">
-                    </div>
-                    <div class="mb-6">
-                        <label class="block text-gray-400 text-sm mb-2">Descripción del caso</label>
-                        <textarea name="descripcionCaso" rows="4" required class="w-full bg-gray-700 border border-gray-600 rounded p-2 text-white outline-none focus:border-purple-500"></textarea>
-                    </div>
-                    <div class="flex justify-end space-x-3">
-                        <button type="button" onclick="hideCasoForm()" class="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg font-semibold transition">Cancelar</button>
-                        <button type="submit" class="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded-lg font-semibold transition shadow-lg">Crear Publicación</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-
-        <!-- Ranking Top Misiones -->
-        <div class="mb-10 bg-gray-800 p-6 rounded-xl shadow-lg border border-gray-700">
-            <h2 class="text-2xl font-bold text-white mb-4 flex items-center">
-                <span class="text-yellow-500 mr-2">🏆</span> Top Agentes Destacados
-            </h2>
-            <% if (typeof topLeaderboard !== 'undefined' && topLeaderboard.length > 0) { %>
-                <ul class="space-y-3">
-                    <% topLeaderboard.forEach((agent, index) => { %>
-                        <li class="flex justify-between items-center bg-gray-700 p-3 rounded-lg border border-gray-600">
-                            <div class="flex items-center">
-                                <span class="font-bold text-xl mr-3 w-8 text-center
-                                    <%= index === 0 ? 'text-yellow-400' : index === 1 ? 'text-gray-300' : index === 2 ? 'text-orange-400' : 'text-gray-500' %>">
-                                    #<%= index + 1 %>
-                                </span>
-                                <span class="font-semibold text-white"><%= agent.username %></span>
-                            </div>
-                            <span class="bg-purple-600 text-white text-xs font-bold px-3 py-1 rounded-full"><%= agent.completedCount %> misiones completadas</span>
-                        </li>
-                    <% }) %>
-                </ul>
-            <% } else { %>
-                <p class="text-gray-400 text-sm italic">Aún no hay agentes con misiones completadas.</p>
-            <% } %>
-        </div>
-
-        <h2 class="text-3xl font-bold mb-8 text-center border-t border-gray-700 pt-8 mt-4">Misiones Disponibles</h2>
-        
-        <% if (missions.length === 0) { %>
-            <div class="text-center p-12 bg-gray-800 rounded-xl">
-                <p class="text-gray-400 text-xl">No hay misiones activas en este momento. ¡Vuelve más tarde!</p>
+        <% if (typeof isOnlyPostulante !== 'undefined' && isOnlyPostulante) { %>
+            <!-- Vista exclusiva para usuarios que solo pueden postularse -->
+            <div class="flex flex-col items-center justify-center py-16 text-center bg-gray-800 rounded-xl shadow-2xl border border-gray-700">
+                <span class="text-6xl mb-6">🕵️‍♂️</span>
+                <h2 class="text-3xl font-bold text-white mb-4">Postulación a Interviewer PFA</h2>
+                <p class="text-gray-400 mb-8 max-w-lg">Cumples con el rango de Sargento Mayor. Estás habilitado para enviar tu formulario oficial y unirte al equipo de Interviewers.</p>
+                <a href="/dashboard/user/postulacion" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-10 rounded-lg shadow-lg text-xl transition">
+                    📝 Abrir Formulario de Postulación
+                </a>
             </div>
         <% } else { %>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <% missions.forEach(mission => { %>
-                    <div class="bg-gray-800 p-6 rounded-xl shadow-lg border-t-4 <%= completedMissions[mission.id] ? 'border-green-500' : 'border-blue-500' %>">
-                        <div class="flex justify-between items-start mb-4">
-                            <h3 class="text-xl font-bold"><%= mission.title %></h3>
-                            <% if (completedMissions[mission.id]) { %>
-                                <span class="bg-green-600/20 text-green-400 text-xs font-bold px-3 py-1 rounded-full flex items-center">
-                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+            
+            <!-- Sección de Abrir Caso e Interviewer -->
+            <div class="mb-10 flex flex-col md:flex-row justify-between items-center bg-gray-800 p-6 rounded-xl shadow-lg border border-gray-700">
+                <div class="mb-4 md:mb-0 text-center md:text-left">
+                    <h2 class="text-2xl font-bold text-white">Gestión de Casos e Interviewer</h2>
+                    <p class="text-gray-400 text-sm">Abre un nuevo caso de investigación o envia tu postulación a Interviewer PFA.</p>
+                </div>
+                <div class="flex flex-col md:flex-row space-y-3 md:space-y-0 md:space-x-4">
+                    <button onclick="showCasoForm()" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-8 rounded-lg shadow-lg transition whitespace-nowrap">
+                        + Abrir Caso
+                    </button>
+                    <% if (typeof canPostular !== 'undefined' && canPostular) { %>
+                        <a href="/dashboard/user/postulacion" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg shadow-lg transition whitespace-nowrap text-center">
+                            📝 Postularse a Interviewer
+                        </a>
+                    <% } %>
+                </div>
+            </div>
+
+            <!-- Modal Abrir Caso -->
+            <div id="caso-modal" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
+                <div class="bg-gray-800 p-6 rounded-xl max-w-md w-full shadow-2xl border border-gray-700">
+                    <h3 class="text-2xl font-bold mb-4">Abrir Nuevo Caso</h3>
+                    <form action="/dashboard/user/caso" method="POST">
+                        <div class="mb-4">
+                            <label class="block text-gray-400 text-sm mb-2">Número de Caso</label>
+                            <input type="text" name="numeroCaso" placeholder="Ej: 021" required class="w-full bg-gray-700 border border-gray-600 rounded p-2 text-white outline-none focus:border-purple-500">
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-gray-400 text-sm mb-2">Nombre de Mafia / Organización</label>
+                            <input type="text" name="nombreMafia" placeholder="Ej: PEÑAROL" required class="w-full bg-gray-700 border border-gray-600 rounded p-2 text-white outline-none focus:border-purple-500">
+                        </div>
+                        <div class="mb-6">
+                            <label class="block text-gray-400 text-sm mb-2">Descripción del caso</label>
+                            <textarea name="descripcionCaso" rows="4" required class="w-full bg-gray-700 border border-gray-600 rounded p-2 text-white outline-none focus:border-purple-500"></textarea>
+                        </div>
+                        <div class="flex justify-end space-x-3">
+                            <button type="button" onclick="hideCasoForm()" class="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg font-semibold transition">Cancelar</button>
+                            <button type="submit" class="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded-lg font-semibold transition shadow-lg">Crear Publicación</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Ranking Top Misiones -->
+            <div class="mb-10 bg-gray-800 p-6 rounded-xl shadow-lg border border-gray-700">
+                <h2 class="text-2xl font-bold text-white mb-4 flex items-center">
+                    <span class="text-yellow-500 mr-2">🏆</span> Top Agentes Destacados
+                </h2>
+                <% if (typeof topLeaderboard !== 'undefined' && topLeaderboard.length > 0) { %>
+                    <ul class="space-y-3">
+                        <% topLeaderboard.forEach((agent, index) => { %>
+                            <li class="flex justify-between items-center bg-gray-700 p-3 rounded-lg border border-gray-600">
+                                <div class="flex items-center">
+                                    <span class="font-bold text-xl mr-3 w-8 text-center
+                                        <%= index === 0 ? 'text-yellow-400' : index === 1 ? 'text-gray-300' : index === 2 ? 'text-orange-400' : 'text-gray-500' %>">
+                                        #<%= index + 1 %>
+                                    </span>
+                                    <span class="font-semibold text-white"><%= agent.username %></span>
+                                </div>
+                                <span class="bg-purple-600 text-white text-xs font-bold px-3 py-1 rounded-full"><%= agent.completedCount %> misiones completadas</span>
+                            </li>
+                        <% }) %>
+                    </ul>
+                <% } else { %>
+                    <p class="text-gray-400 text-sm italic">Aún no hay agentes con misiones completadas.</p>
+                <% } %>
+            </div>
+
+            <h2 class="text-3xl font-bold mb-8 text-center border-t border-gray-700 pt-8 mt-4">Misiones Disponibles</h2>
+            
+            <% if (missions.length === 0) { %>
+                <div class="text-center p-12 bg-gray-800 rounded-xl">
+                    <p class="text-gray-400 text-xl">No hay misiones activas en este momento. ¡Vuelve más tarde!</p>
+                </div>
+            <% } else { %>
                                     Completada
                                 </span>
                             <% } %>

@@ -311,66 +311,73 @@ router.post('/user/postulacion', async (req, res) => {
 router.get('/user', async (req, res) => {
     const isAdmin = req.userRoles.some(role => adminRoles.includes(role));
     const isUser = req.userRoles.some(role => userRoles.includes(role));
-    if (!isUser && !isAdmin) return res.render('no_access', { user: req.user });
-
-    const missions = await prisma.mission.findMany({ orderBy: { createdAt: 'desc' } });
-    
-    // Obtener pruebas enviadas por este usuario para la vista
-    const userProofs = await prisma.proof.findMany({
-        where: { userId: req.user.id }
-    });
-    
-    const completedMissions = {};
-    const proofCounts = {};
-
-    userProofs.forEach(p => {
-        if (!proofCounts[p.missionId]) proofCounts[p.missionId] = 0;
-        proofCounts[p.missionId]++;
-    });
-
-    missions.forEach(m => {
-        const count = proofCounts[m.id] || 0;
-        if (count >= m.requiredProofs) {
-            completedMissions[m.id] = true;
-        }
-    });
-
-    // --- CÁLCULO DEL RANKING (TOP AGENTES) ---
-    const allProofs = await prisma.proof.findMany();
-    const userStats = {};
-    allProofs.forEach(p => {
-        if (!userStats[p.userId]) {
-            userStats[p.userId] = { username: p.username, missionCounts: {} };
-        }
-        if (!userStats[p.userId].missionCounts[p.missionId]) {
-            userStats[p.userId].missionCounts[p.missionId] = 0;
-        }
-        userStats[p.userId].missionCounts[p.missionId]++;
-    });
-
-    const leaderboard = [];
-    for (const userId in userStats) {
-        const stats = userStats[userId];
-        let completedCount = 0;
-        for (const missionId in stats.missionCounts) {
-            const count = stats.missionCounts[missionId];
-            const mission = missions.find(m => m.id === parseInt(missionId));
-            if (mission && count >= mission.requiredProofs) {
-                completedCount++;
-            }
-        }
-        if (completedCount > 0) {
-            leaderboard.push({ username: stats.username, completedCount });
-        }
-    }
-    
-    leaderboard.sort((a, b) => b.completedCount - a.completedCount);
-    const topLeaderboard = leaderboard.slice(0, 5);
-    // ------------------------------------------
-
     const canPostular = req.userRoles.includes(POSTULACION_ROLE) || isAdmin;
 
-    res.render('user', { user: req.user, missions, completedMissions, proofCounts, isAdmin, topLeaderboard, canPostular });
+    // Si no es admin, no es usuario y no puede postularse -> Sin acceso
+    if (!isUser && !isAdmin && !canPostular) {
+        return res.render('no_access', { user: req.user });
+    }
+
+    const isOnlyPostulante = !isUser && !isAdmin && canPostular;
+
+    let missions = [];
+    let completedMissions = {};
+    let proofCounts = {};
+    let topLeaderboard = [];
+
+    // Solo consultar misiones y ranking si tiene rol PDI o Admin
+    if (!isOnlyPostulante) {
+        missions = await prisma.mission.findMany({ orderBy: { createdAt: 'desc' } });
+        
+        const userProofs = await prisma.proof.findMany({
+            where: { userId: req.user.id }
+        });
+
+        userProofs.forEach(p => {
+            if (!proofCounts[p.missionId]) proofCounts[p.missionId] = 0;
+            proofCounts[p.missionId]++;
+        });
+
+        missions.forEach(m => {
+            const count = proofCounts[m.id] || 0;
+            if (count >= m.requiredProofs) {
+                completedMissions[m.id] = true;
+            }
+        });
+
+        const allProofs = await prisma.proof.findMany();
+        const userStats = {};
+        allProofs.forEach(p => {
+            if (!userStats[p.userId]) {
+                userStats[p.userId] = { username: p.username, missionCounts: {} };
+            }
+            if (!userStats[p.userId].missionCounts[p.missionId]) {
+                userStats[p.userId].missionCounts[p.missionId] = 0;
+            }
+            userStats[p.userId].missionCounts[p.missionId]++;
+        });
+
+        const leaderboard = [];
+        for (const userId in userStats) {
+            const stats = userStats[userId];
+            let completedCount = 0;
+            for (const missionId in stats.missionCounts) {
+                const count = stats.missionCounts[missionId];
+                const mission = missions.find(m => m.id === parseInt(missionId));
+                if (mission && count >= mission.requiredProofs) {
+                    completedCount++;
+                }
+            }
+            if (completedCount > 0) {
+                leaderboard.push({ username: stats.username, completedCount });
+            }
+        }
+        
+        leaderboard.sort((a, b) => b.completedCount - a.completedCount);
+        topLeaderboard = leaderboard.slice(0, 5);
+    }
+
+    res.render('user', { user: req.user, missions, completedMissions, proofCounts, isAdmin, topLeaderboard, canPostular, isOnlyPostulante });
 });
 
 router.post('/user/upload', upload.single('proofImage'), async (req, res) => {
