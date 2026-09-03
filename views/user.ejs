@@ -21,14 +21,19 @@
     </script>
 </head>
 <body class="bg-gray-900 text-white min-h-screen">
-    <nav class="bg-gray-800 p-4 shadow-lg flex justify-between items-center">
-        <h1 class="text-2xl font-bold text-green-400">Dashboard de Misiones</h1>
-        <div>
-            <span class="mr-4 text-gray-300">Usuario: <%= user.username %></span>
-            <% if (typeof isAdmin !== 'undefined' && isAdmin) { %>
-                <a href="/dashboard/admin" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded text-sm font-semibold transition mr-2">Panel Admin</a>
+    <nav class="bg-gray-800 p-4 shadow-lg flex flex-col md:flex-row justify-between items-center gap-4 md:gap-0">
+        <h1 class="text-2xl font-bold text-blue-400">Panel de Usuario</h1>
+        <div class="flex flex-wrap items-center justify-center gap-3">
+            <span class="text-gray-300">Agente: <%= user.username %></span>
+            <% if (typeof canPostular !== 'undefined' && canPostular) { %>
+                <a href="/dashboard/user/postulacion" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded text-sm font-bold transition flex items-center shadow-md">
+                    📝 Postularse a Interviewer
+                </a>
             <% } %>
-            <a href="/auth/logout" class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded text-sm font-semibold transition">Salir</a>
+            <% if (typeof isAdmin !== 'undefined' && isAdmin) { %>
+                <a href="/dashboard/admin" class="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded text-sm font-semibold transition shadow-md">Admin</a>
+            <% } %>
+            <a href="/auth/logout" class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded text-sm font-semibold transition shadow-md">Salir</a>
         </div>
     </nav>
 
@@ -36,32 +41,23 @@
         
         <% if (typeof isOnlyPostulante !== 'undefined' && isOnlyPostulante) { %>
             <!-- Vista exclusiva para usuarios que solo pueden postularse -->
-            <div class="flex flex-col items-center justify-center py-16 text-center bg-gray-800 rounded-xl shadow-2xl border border-gray-700">
-                <span class="text-6xl mb-6">🕵️‍♂️</span>
-                <h2 class="text-3xl font-bold text-white mb-4">Postulación a Interviewer PFA</h2>
-                <p class="text-gray-400 mb-8 max-w-lg">Cumples con el rango de Sargento Mayor. Estás habilitado para enviar tu formulario oficial y unirte al equipo de Interviewers.</p>
-                <a href="/dashboard/user/postulacion" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-10 rounded-lg shadow-lg text-xl transition">
-                    📝 Abrir Formulario de Postulación
-                </a>
+            <div class="flex flex-col items-center justify-center py-16 text-center">
+                <span class="text-6xl mb-6">👮‍♂️</span>
+                <h2 class="text-3xl font-bold text-white mb-4">¡Bienvenido!</h2>
+                <p class="text-gray-400 mb-8 max-w-lg">Actualmente no estás activo como PDI, pero cuentas con el rango necesario para unirte al equipo de Interviewers.</p>
+                <p class="text-gray-300">Haz clic en el botón azul de la barra superior para abrir tu formulario.</p>
             </div>
         <% } else { %>
             
-            <!-- Sección de Abrir Caso e Interviewer -->
+            <!-- Sección de Abrir Caso -->
             <div class="mb-10 flex flex-col md:flex-row justify-between items-center bg-gray-800 p-6 rounded-xl shadow-lg border border-gray-700">
                 <div class="mb-4 md:mb-0 text-center md:text-left">
-                    <h2 class="text-2xl font-bold text-white">Gestión de Casos e Interviewer</h2>
-                    <p class="text-gray-400 text-sm">Abre un nuevo caso de investigación o envia tu postulación a Interviewer PFA.</p>
+                    <h2 class="text-2xl font-bold text-white">Gestión de Casos</h2>
+                    <p class="text-gray-400 text-sm">Abre un nuevo caso de investigación privado y seguro.</p>
                 </div>
-                <div class="flex flex-col md:flex-row space-y-3 md:space-y-0 md:space-x-4">
-                    <button onclick="showCasoForm()" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-8 rounded-lg shadow-lg transition whitespace-nowrap">
-                        + Abrir Caso
-                    </button>
-                    <% if (typeof canPostular !== 'undefined' && canPostular) { %>
-                        <a href="/dashboard/user/postulacion" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg shadow-lg transition whitespace-nowrap text-center">
-                            📝 Postularse a Interviewer
-                        </a>
-                    <% } %>
-                </div>
+                <button onclick="showCasoForm()" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-8 rounded-lg shadow-lg transition whitespace-nowrap">
+                    + Abrir Caso
+                </button>
             </div>
 
             <!-- Modal Abrir Caso -->
